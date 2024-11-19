@@ -5,7 +5,7 @@ use openvk\Web\Util\Sms;
 use openvk\Web\Themes\Themepacks;
 use openvk\Web\Models\Entities\{Photo, Post, EmailChangeVerification};
 use openvk\Web\Models\Entities\Notifications\{CoinsTransferNotification, RatingUpNotification};
-use openvk\Web\Models\Repositories\{Users, Clubs, Albums, Videos, Notes, Vouchers, EmailChangeVerifications, Audios};
+use openvk\Web\Models\Repositories\{Users, Clubs, Albums, Videos, Notes, Vouchers, EmailChangeVerifications, Audios, Posts};
 use openvk\Web\Models\Exceptions\InvalidUserNameException;
 use openvk\Web\Util\Validator;
 use Chandler\Security\Authenticator;
@@ -26,12 +26,55 @@ final class UserPresenter extends OpenVKPresenter
         parent::__construct();
     }
     
-    function renderOutbox(int $id): void
+    function renderInbox(int $id): void 
+    {
+        exit("To-Do!");
+    }
+
+    function renderOutbox(int $id): void // Isnt that should go to WallPresenter? :thinking_face:
     {
         $user = $this->users->get($id);
         $host = OPENVK_ROOT_CONF['openvk']['preferences']['domain'];
-        if(str_contains($_SERVER['HTTP_ACCEPT'], 'application/activity+json') && $user) {
+        
+        //$posts = (new NotesRepo)->getUserNotes($user, 1);
+        if(str_contains($_SERVER["HTTP_ACCEPT"], "application/activity+json") && $user) {
             header("Content-Type: application/activity+json");
+            if(array_key_exists("page", $_GET) ) {
+                $posts = (new Posts)->getPostsFromUsersWall($id, (int)$_GET["page"]);
+                $prevPage = (int)$_GET["page"] <= 1 ? (int)$_GET["page"] : (int)$_GET["page"] - 1;
+                $nextPage = (int)$_GET["page"] + 1;
+                exit(json_encode([
+                    "@context" => "https://www.w3.org/ns/activitystreams",
+                    "id" => "https://$host${_SERVER['REQUEST_URI']}",
+                    "type" => "OrderedCollectionPage",
+                    "prev" => "https://$host/id$id/outbox?page=$prevPage",
+                    "next" => "https://$host/id$id/outbox?page=$nextPage",
+                    "partOf" => "https://$host/id$id/outbox",
+                    "orderedItems" => array_map(fn($a) => [
+                        "id" => "https://$host/wall_{$a->getPrettyId()}/activity",
+                        "type" => "Create",
+                        "to" => [ "https://www.w3.org/ns/activitystreams#Public" ], # Thats yet only-public as basically AP support is alpha 
+                        "cc" => [], # Yet again TODO
+                        "object" => [
+                            "id" => "https://$host/wall_{$a->getPrettyId()}/activity",
+                            "type" => "Note",
+                            "published" => $a->getPublicationTime()->format("%Y-%m-%dT%H:%M:%SZ"),
+                            "content" => $a->getText(false)
+                        ]
+                    ], [...$posts])
+                ]));
+            } else {
+                $pages = (new Posts)->getPostCountOnUserWall($id) % OPENVK_DEFAULT_PER_PAGE;
+                exit(json_encode([
+                    "@context" => "https://www.w3.org/ns/activitystreams",
+                    "id" => "https://$host/id$id/outbox",
+                    "type" => "OrderedCollection",
+                    "first" => "https://$host/id$id/outbox?page=1",
+                    "last" => "https://$host/id$id/outbox?page=$pages",
+                    "totalItems" => (new Posts)->getPostCountOnUserWall($id)
+                ]));
+            }
+            
         } else {
             header("HTTP/1.1 404 Not Found");
             exit("User does not exists or \"Accept\" header is not contains \"application/activity+json\"");
