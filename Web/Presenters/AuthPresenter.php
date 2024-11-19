@@ -111,6 +111,16 @@ final class AuthPresenter extends OpenVKPresenter
                 $user->setRegistering_Ip(CONNECTING_IP);
                 $user->setBirthday(empty($this->postParam("birthday")) ? NULL : strtotime($this->postParam("birthday")));
                 $user->setActivated((int)!OPENVK_ROOT_CONF['openvk']['preferences']['security']['requireEmail']);
+                $new_key_pair = openssl_pkey_new(array(
+                    "private_key_bits" => 2048,
+                    "private_key_type" => OPENSSL_KEYTYPE_RSA,
+                ));
+                openssl_pkey_export($new_key_pair, $private_key_pem);
+                
+                $details = openssl_pkey_get_details($new_key_pair);
+                $public_key_pem = $details['key'];
+                $user->setPrivateKey($private_key_pem);
+                $user->setPublicKey($public_key_pem);
             } catch(InvalidUserNameException $ex) {
                 $this->flashFail("err", tr("error"), tr("invalid_real_name"));
             }

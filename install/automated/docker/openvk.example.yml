@@ -5,6 +5,7 @@ openvk:
         motd: "Yet another OpenVK instance"
     
     preferences:
+        domain: "localhost:8080"
         femaleGenderPriority: true
         nginxCacheTime: null
         uploads:

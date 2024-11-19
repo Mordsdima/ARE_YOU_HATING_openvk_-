@@ -1,0 +1,3 @@
+ALTER TABLE `profiles` ADD `publicKey` TEXT DEFAULT NULL;
+ALTER TABLE `profiles` ADD `privateKey` TEXT DEFAULT NULL;
+ALTER TABLE `profiles` ADD `isRemote` BOOLEAN DEFAULT 0;

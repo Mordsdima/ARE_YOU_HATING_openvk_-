@@ -415,3 +415,5 @@ routes:
       handler: "Maintenance->section"
     - url: "/maintenances/"
       handler: "Maintenance->all"
+    - url: "/.well-known/webfinger"
+      handler: "WellKnown->webfinger"

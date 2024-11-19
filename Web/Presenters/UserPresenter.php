@@ -26,9 +26,47 @@ final class UserPresenter extends OpenVKPresenter
         parent::__construct();
     }
     
-    function renderView(int $id): void
+    function renderOutbox(int $id): void
     {
         $user = $this->users->get($id);
+        $host = OPENVK_ROOT_CONF['openvk']['preferences']['domain'];
+        if(str_contains($_SERVER['HTTP_ACCEPT'], 'application/activity+json') && $user) {
+            header("Content-Type: application/activity+json");
+        } else {
+            header("HTTP/1.1 404 Not Found");
+            exit("User does not exists or \"Accept\" header is not contains \"application/activity+json\"");
+        }
+    }
+
+    function renderView(int $id): void
+    {   
+        $user = $this->users->get($id);
+
+        if(str_contains($_SERVER['HTTP_ACCEPT'], 'application/activity+json') && $user) {
+            // Fediverse request?
+            // We should check incoming GET request but thats TODO yet.
+            header("Content-Type: application/activity+json");
+            $host = OPENVK_ROOT_CONF['openvk']['preferences']['domain'];
+            exit(json_encode([
+                "@context" => [
+                    "https://www.w3.org/ns/activitystreams",
+                    "https://w3id.org/security/v1"
+                ],
+                "id" => "https://$host/id$id",
+                "type" => "Person",
+                "name" => $user->getFirstName(),
+                "preferredUsername" => "id$id",
+                "url" => "https://$host/id$id",
+                "inbox" => "https://$host/id$id/inbox",
+                "outbox" => "https://$host/id$id/outbox",
+                "publicKey" => [
+                    "id" => "https://$host/id$id#main-key",
+                    "owner" => "https://$host/id$id",
+                    "publicKeyPem" => $user->getPublicKey()
+                ]
+            ]));
+        }
+
         if(!$user || $user->isDeleted() || !$user->canBeViewedBy($this->user->identity)) {
             if(!is_null($user) && $user->isDeactivated()) {
                 $this->template->_template = "User/deactivated.xml";

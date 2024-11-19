@@ -1479,6 +1479,11 @@ class User extends RowModel
         return DatabaseConnection::i()->getContext()->table("ignored_sources")->where("owner", $this->getId())->count();
     }
 
+    function getPublicKey()
+    {
+        return $this->getRecord()->publicKey;
+    }
+
     use Traits\TBackDrops;
     use Traits\TSubscribable;
     use Traits\TAudioStatuses;
