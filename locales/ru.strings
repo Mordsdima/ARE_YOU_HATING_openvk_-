@@ -205,6 +205,7 @@
 "all_news" = "Все новости";
 "posts_per_page" = "Количество записей на странице";
 "show_ignored_sources" = "Показывать игнорируемые источники";
+"auto_scroll" = "Автоматическая прокрутка";
 "attachment" = "Вложение";
 "post_as_group" = "От имени сообщества";
 "comment_as_group" = "От имени сообщества";
@@ -249,6 +250,15 @@
 "others_posts" = "Чужие записи";
 "show_more" = "Показать больше";
 "has_repost" = "Содержит репост";
+
+"likers_list" = "Список лайкнувших";
+"liked_verb" = "Понравилось";
+
+"liked_by_x_people_one" = "Понравилось $1 человеку";
+"liked_by_x_people_few" = "Понравилось $1 людям";
+"liked_by_x_people_many" = "Понравилось $1 людям";
+"liked_by_x_people_other" = "Понравилось $1 людям";
+"liked_by_x_people_zero" = "Никому не понравилось";
 
 /* Friends */
 
@@ -661,6 +671,7 @@
 "privacy_setting_write_wall" = "Кто может писать у меня на стене";
 "privacy_setting_write_messages" = "Кто может писать мне сообщения";
 "privacy_setting_view_audio" = "Кому видно мои аудиозаписи";
+"privacy_setting_see_likes" = "Кому видны мои лайки";
 "privacy_value_anybody" = "Все желающие";
 "privacy_value_anybody_dative" = "Всем желающим";
 "privacy_value_users" = "Пользователям OpenVK";
@@ -2117,3 +2128,9 @@
 "roll_back" = "откатить";
 "roll_backed" = "откачено";
 
+/* RSS */
+
+"post_deact_in_general" = "Удаление страницы";
+"upd_in_general" = "Обновление фотографии страницы";
+"on_wall" = "На стене";
+"sign_short" = "Подпись";

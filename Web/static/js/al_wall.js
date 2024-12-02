@@ -399,6 +399,7 @@ async function OpenVideo(video_arr = [], init_player = true)
             details.find('.media-page-wrapper-description b').remove()
 
             u('#ovk-player-info').html(details.html())
+            bsdnHydrate()
         }
     })
 
@@ -461,7 +462,7 @@ u(document).on('click', '#videoOpen', (e) => {
 
 u(document).on("keydown", "#write > form", function(event) {
     if(event.ctrlKey && event.keyCode === 13)
-        this.submit();
+        u(event.target).closest('form').find(`input[type='submit']`).nodes[0].click()
 });
 
 u(document).on('keydown', '.edit_menu #write', (e) => {
@@ -542,7 +543,8 @@ var tooltipClientNoInfoTemplate = Handlebars.compile(`
     </table>
 `);
 
-tippy(".client_app", {
+tippy.delegate("body", {
+    target: '.client_app',
     theme: "light vk",
     content: "⌛",
     allowHTML: true,
@@ -578,6 +580,54 @@ tippy(".client_app", {
         }
     }
 });
+
+tippy.delegate('body', {
+    animation: 'up_down',
+    target: `.post-like-button[data-type]:not([data-likes="0"])`,
+    theme: "special vk",
+    content: "⌛",
+    allowHTML: true,
+    interactive: true,
+    interactiveDebounce: 500,
+
+    onCreate: async function(that) {
+        that._likesList = null;
+    },
+
+    onShow: async function(that) {
+        const id  = that.reference.dataset.id
+        const type = that.reference.dataset.type
+        let final_type = type
+        if(type == 'post') {
+            final_type = 'wall'
+        }
+
+        if(!that._likesList) {
+            that._likesList = await window.OVKAPI.call('likes.getList', {'extended': 1, 'count': 6, 'type': type, 'owner_id': id.split('_')[0], 'item_id': id.split('_')[1]})
+        }
+
+        const final_template = u(`
+            <div style='margin: -6px -10px;'>
+                <div class='like_tooltip_wrapper'>
+                    <a href="/${final_type}/${id}/likes" class='like_tooltip_head'>
+                        <span>${tr('liked_by_x_people', that._likesList.count)}</span>
+                    </a>
+
+                    <div class='like_tooltip_body'>
+                        <div class='like_tooltip_body_grid'></div>
+                    </div>
+                </div>
+            </div>
+        `)
+
+        that._likesList.items.forEach(item => {
+            final_template.find('.like_tooltip_body .like_tooltip_body_grid').append(`
+                <a href='/id${item.id}'><img src='${item.photo_50}' alt='.'></a>
+            `)
+        })
+        that.setContent(final_template.nodes[0].outerHTML)
+    }
+})
 
 async function showArticle(note_id) {
     u("body").addClass("dimmed");
@@ -836,7 +886,7 @@ async function __uploadToTextarea(file, textareaNode) {
     if(filetype == 'photo') {
         const temp_url = URL.createObjectURL(file)
         const rand = random_int(0, 1000)
-        textareaNode.find('.post-horizontal').append(`<a id='temp_filler${rand}' class="upload-item"><img src='${temp_url}'></a>`)
+        textareaNode.find('.post-horizontal').append(`<a id='temp_filler${rand}' class="upload-item lagged"><img src='${temp_url}'></a>`)
         
         const res = await fetch(`/photos/upload`, {
             method: 'POST',
@@ -2002,6 +2052,85 @@ $(document).on("click", ".avatarDelete", (e) => {
         }),
     ]);
 })
+
+async function __processPaginatorNextPage(page)
+{
+    const container = u('.scroll_container')
+    const container_node = '.scroll_node'
+    const parser = new DOMParser
+
+    const replace_url = new URL(location.href)
+    replace_url.searchParams.set('p', page)
+    /*replace_url.searchParams.set('al', 1)
+    replace_url.searchParams.set('hash', u("meta[name=csrf]").attr("value"))*/
+
+    const new_content = await fetch(replace_url.href)
+    const new_content_response = await new_content.text()
+    const parsed_content = parser.parseFromString(new_content_response, 'text/html')
+
+    const nodes = parsed_content.querySelectorAll(container_node)
+    nodes.forEach(node => {
+        container.append(node)
+    })
+
+    u(`.paginator:not(.paginator-at-top)`).html(parsed_content.querySelector('.paginator:not(.paginator-at-top)').innerHTML)
+    if(u(`.paginator:not(.paginator-at-top)`).nodes[0].closest('.scroll_container')) {
+        container.nodes[0].append(u(`.paginator:not(.paginator-at-top)`).nodes[0].parentNode)
+    }
+    
+    if(window.player) {
+        window.player.loadContextPage(page)
+    }
+
+    if(typeof __scrollHook != 'undefined') {
+        __scrollHook(page)
+    }
+}
+
+const showMoreObserver = new IntersectionObserver(entries => {
+    entries.forEach(async x => {
+        if(x.isIntersecting) {
+            if(Number(localStorage.getItem('ux.auto_scroll') ?? 1) == 0) {
+                return
+            }
+
+            if(u('.scroll_container').length < 1) {
+                return
+            }
+            
+            const target = u(x.target)
+            if(target.length < 1 || target.hasClass('paginator-at-top')) {
+                return
+            }
+
+            const current_url = new URL(location.href)
+            if(current_url.searchParams && !isNaN(parseInt(current_url.searchParams.get('p')))) {
+                return
+            }
+
+            target.addClass('lagged')
+            const active_tab = target.find('.active')
+            const next_page  = u(active_tab.nodes[0] ? active_tab.nodes[0].nextElementSibling : null)
+            if(next_page.length < 1) {
+                u('.paginator:not(.paginator-at-top)').removeClass('lagged')
+                return
+            }
+
+            const page_number = Number(next_page.html())
+            await __processPaginatorNextPage(page_number)
+            bsdnHydrate()
+            u('.paginator:not(.paginator-at-top)').removeClass('lagged')
+        }
+    })
+}, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0,
+})
+
+if(u('.paginator:not(.paginator-at-top)').length > 0) {
+    showMoreObserver.observe(u('.paginator:not(.paginator-at-top)').nodes[0])
+}
 
 u(document).on('click', '#__sourceAttacher', (e) => {
     MessageBox(tr('add_source'), `
