@@ -220,6 +220,7 @@
 "all_news" = "All news";
 "posts_per_page" = "Number of posts per page";
 "show_ignored_sources" = "Show ignored sources";
+"auto_scroll" = "Autoscroll";
 
 "attachment" = "Attachment";
 "post_as_group" = "Post as group";
@@ -270,6 +271,15 @@
 
 "show_more" = "Show more";
 "has_repost" = "Has repost";
+
+"likers_list" = "Likers list";
+"liked_verb" = "Liked by";
+
+"liked_by_x_people_one" = "Liked by $1 user";
+"liked_by_x_people_few" = "Liked by $1 users";
+"liked_by_x_people_many" = "Liked by $1 users";
+"liked_by_x_people_other" = "Liked by $1 users";
+"liked_by_x_people_zero" = "Nobody liked";
 
 /* Friends */
 
@@ -688,6 +698,7 @@
 "privacy_setting_write_wall" = "Who can publish posts on my wall";
 "privacy_setting_write_messages" = "Who can write messages to me";
 "privacy_setting_view_audio" = "Who can see my audios";
+"privacy_setting_see_likes" = "Who can see my likes";
 "privacy_value_anybody" = "Anybody";
 "privacy_value_anybody_dative" = "Anybody";
 "privacy_value_users" = "OpenVK users";
@@ -871,7 +882,7 @@
 "genre" = "Genre";
 "lyrics" = "Lyrics";
 
-"select_another_file" = "Select another file";
+"select_another_file" = "Upload another file";
 
 "limits" = "Limits";
 "select_audio" = "Select audio from your computer";
@@ -938,12 +949,11 @@
 "add_to_playlist" = "Add to playlist";
 "remove_from_playlist" = "Remove from playlist";
 "delete_playlist" = "Delete playlist";
-"playlist_cover" = "Playlist cover";
 
 "playlists_user" = "User's playlists";
 "playlists_club" = "Group's playlists";
 "change_cover" = "Change cover";
-"playlist_cover" = "Playlist's cover";
+"playlist_cover" = "Playlist cover";
 
 "minutes_count_zero" = "Lasts no minutes";
 "minutes_count_one" = "Lasts one minute";
@@ -984,8 +994,16 @@
 "repeat_tip" = "Repeat";
 "shuffle_tip" = "Shuffle";
 "mute_tip" = "Mute";
+"mute_tip_noun" = "Muted";
 "playlist_hide_from_search" = "Unlisted";
 "confirm_deleting_audio" = "Do you sure want to delete this audio?";
+
+"copy_link_to_audio" = "Copy link to clipboard";
+"copy_link_to_audio_error_not_selected_track" = "Track was not selected";
+"audio_ctx_add_to_group" = "Add to group";
+"audio_ctx_add_to_playlist" = "Add to playlist";
+"audio_ctx_play_next" = "Play next";
+"audio_ctx_clear_context" = "Clear tracks list";
 
 /* Notifications */
 
@@ -1585,6 +1603,7 @@
 "error_adding_source_regex" = "Error adding source: incorrect link.";
 "error_adding_source_long" = "Error adding source: link is too long.";
 "error_adding_source_sus" = "Error adding source: suspicious link.";
+"error_playlist_creating_too_small" = "Add at least one audio";
 
 /* Admin actions */
 
@@ -2226,3 +2245,10 @@
 
 "roll_back" = "rollback";
 "roll_backed" = "rollbacked";
+
+/* RSS */
+
+"post_deact_in_general" = "Page deletion";
+"upd_in_general" = "Avatar update";
+"on_wall" = "On wall";
+"sign_short" = "Sign";

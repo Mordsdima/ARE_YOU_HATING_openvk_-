@@ -53,7 +53,7 @@ class Posts
                     $offset--;
                 }
             }
-        } else if(!is_null($offset)) {
+        } else if(!is_null($offset) && $pinPost) {
             $offset--;
         }
         

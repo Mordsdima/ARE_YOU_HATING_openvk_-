@@ -282,6 +282,11 @@ abstract class OpenVKPresenter extends SimplePresenter
                 $this->redirect("/maintenances/");
             }
         }
+        
+        if($_SERVER['HTTP_X_OPENVK_AJAX_QUERY'] == '1' && $this->user->identity) {
+            error_reporting(0);
+            header('Content-Type: text/plain; charset=UTF-8');
+        }
 
         parent::onStartup();
     }

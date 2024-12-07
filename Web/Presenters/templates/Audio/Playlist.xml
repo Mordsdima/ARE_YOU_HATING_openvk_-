@@ -32,8 +32,14 @@
 
 {block content}
     {include "bigplayer.xml"}
+    <script>
+        window.__current_page_audio_context = {
+            name: 'playlist_context',
+            entity_id: {$playlist->getId()},
+            page: {$page}
+        }
+    </script>
     
-    <input type="hidden" name="bigplayer_context" data-type="playlist_context" data-entity="{$playlist->getId()}" data-page="{$page}">
     <div class="playlistBlock">
         <div class="playlistCover" style="float: left;">
             {if $cover}
@@ -67,11 +73,11 @@
                     <hr style="color: #f7f7f7;">
                 </div>
             </div>
-            <div class="audiosContainer infContainer" style="margin-top: 14px;">
+            <div class="audiosContainer scroll_container infContainer" style="margin-top: 14px;">
                 {if $count < 1}
                     {_empty_playlist}
                 {else}  
-                    <div class="infObj" n:foreach="$audios as $audio">
+                    <div class="scroll_node" n:foreach="$audios as $audio">
                         {include "player.xml", audio => $audio}
                     </div>
 

@@ -53,8 +53,9 @@ u(document).on('click', '.menu_toggler', (e) => {
     }
 })
 
-$(document).on("click", ".post-like-button", function(e) {
+u(document).on("click", ".post-like-button", function(e) {
     e.preventDefault();
+    e.stopPropagation()
     
     var thisBtn = u(this).first();
     var link    = u(this).attr("href");
@@ -90,6 +91,7 @@ async function OpenMiniature(e, photo, post, photo_id, type = "post") {
     костыли но смешные однако
     */
     e.preventDefault();
+    e.stopPropagation()
 
     // Значения для переключения фоток
 
@@ -399,6 +401,7 @@ async function OpenVideo(video_arr = [], init_player = true)
             details.find('.media-page-wrapper-description b').remove()
 
             u('#ovk-player-info').html(details.html())
+            bsdnHydrate()
         }
     })
 
@@ -421,7 +424,7 @@ async function OpenVideo(video_arr = [], init_player = true)
 
         u('body').append(miniplayer)
         miniplayer.find('.miniplayer-body').nodes[0].append(msgbox.getNode().find('.center-part > *').nodes[0])
-        miniplayer.attr('style', `left:100px;top:${scrollY}px;`)
+        miniplayer.attr('style', `left:100px;top:0px;`)
         miniplayer.find('#__miniplayer_return').on('click', (e) => {
             msgbox.reveal()
             msgbox.getNode().find('.center-part').nodes[0].append(miniplayer.find('.miniplayer-body > *').nodes[0])
@@ -433,7 +436,7 @@ async function OpenVideo(video_arr = [], init_player = true)
             u('.miniplayer').remove()
         })
 
-        $('.miniplayer').draggable({cursor: 'grabbing', containment: 'body', cancel: '.miniplayer-body'})
+        $('.miniplayer').draggable({cursor: 'grabbing', containment: 'window', cancel: '.miniplayer-body'})
         $('.miniplayer').resizable({
             maxHeight: 2000,
             maxWidth: 3000,
@@ -447,6 +450,7 @@ async function OpenVideo(video_arr = [], init_player = true)
 
 u(document).on('click', '#videoOpen', (e) => {
     e.preventDefault()
+    e.stopPropagation()
 
     try {
         const target = e.target.closest('#videoOpen')
@@ -461,7 +465,7 @@ u(document).on('click', '#videoOpen', (e) => {
 
 u(document).on("keydown", "#write > form", function(event) {
     if(event.ctrlKey && event.keyCode === 13)
-        this.submit();
+        u(event.target).closest('form').find(`input[type='submit']`).nodes[0].click()
 });
 
 u(document).on('keydown', '.edit_menu #write', (e) => {
@@ -469,6 +473,7 @@ u(document).on('keydown', '.edit_menu #write', (e) => {
         e.target.closest('.edit_menu').querySelector('#__edit_save').click()
 })
 
+// Migrated from inline start
 function reportPhoto(photo_id) {
     uReportMsgTxt  = tr("going_to_report_photo");
     uReportMsgTxt += "<br/>"+tr("report_question_text");
@@ -513,6 +518,280 @@ function reportVideo(video_id) {
     ]);
 }
 
+function reportUser(user_id) {
+    uReportMsgTxt  = tr("going_to_report_user");
+    uReportMsgTxt += "<br/>"+tr("report_question_text");
+    uReportMsgTxt += "<br/><br/><b>"+tr("report_reason")+"</b>: <input type='text' id='uReportMsgInput' placeholder='" + tr("reason") + "' />"
+
+    MessageBox(tr("report_question"), uReportMsgTxt, [tr("confirm_m"), tr("cancel")], [
+        (function() {
+            res = document.querySelector("#uReportMsgInput").value;
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", "/report/" + user_id + "?reason=" + res + "&type=user", true);
+            xhr.onload = (function() {
+                if(xhr.responseText.indexOf("reason") === -1)
+                    MessageBox(tr("error"), tr("error_sending_report"), ["OK"], [Function.noop]);
+                else
+                    MessageBox(tr("action_successfully"), tr("will_be_watched"), ["OK"], [Function.noop]);
+            });
+            xhr.send(null);
+        }),
+        Function.noop
+    ]);
+}
+
+function reportComment(comment_id) {
+    uReportMsgTxt  = tr("going_to_report_comment");
+    uReportMsgTxt += "<br/>"+tr("report_question_text");
+    uReportMsgTxt += "<br/><br/><b>"+tr("report_reason")+"</b>: <input type='text' id='uReportMsgInput' placeholder='" + tr("reason") + "' />"
+
+    MessageBox(tr("report_question"), uReportMsgTxt, [tr("confirm_m"), tr("cancel")], [
+        (function() {
+            res = document.querySelector("#uReportMsgInput").value;
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", "/report/" + comment_id + "?reason=" + res + "&type=comment", true);
+            xhr.onload = (function() {
+                if(xhr.responseText.indexOf("reason") === -1)
+                    MessageBox(tr("error"), tr("error_sending_report"), ["OK"], [Function.noop]);
+                else
+                    MessageBox(tr("action_successfully"), tr("will_be_watched"), ["OK"], [Function.noop]);
+                });
+            xhr.send(null);
+        }),
+        Function.noop
+    ]);
+}
+
+function reportApp(id) {
+    uReportMsgTxt  = tr('going_to_report_app');
+    uReportMsgTxt += "<br/>"+tr("report_question_text");
+    uReportMsgTxt += "<br/><br/><b>"+tr("report_reason")+"</b>: <input type='text' id='uReportMsgInput' placeholder='" + tr("reason") + "' />"
+
+    MessageBox(tr("report_question"), uReportMsgTxt, [tr("confirm_m"), tr("cancel")], [
+        (function() {
+            res = document.querySelector("#uReportMsgInput").value;
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", "/report/" + id + "?reason=" + res + "&type=app", true);
+            xhr.onload = (function() {
+            if(xhr.responseText.indexOf("reason") === -1)
+                MessageBox(tr("error"), tr("error_sending_report"), ["OK"], [Function.noop]);
+            else
+                MessageBox(tr("action_successfully"), tr("will_be_watched"), ["OK"], [Function.noop]);
+            });
+            xhr.send(null);
+        }),
+        Function.noop
+    ]);
+}
+
+function reportClub(club_id) {
+    uReportMsgTxt  = tr("going_to_report_club");
+    uReportMsgTxt += "<br/>"+tr("report_question_text");
+    uReportMsgTxt += "<br/><br/><b>"+tr("report_reason")+"</b>: <input type='text' id='uReportMsgInput' placeholder='" + tr("reason") + "' />"
+
+    MessageBox(tr("report_question"), uReportMsgTxt, [tr("confirm_m"), tr("cancel")], [
+        (function() {
+            res = document.querySelector("#uReportMsgInput").value;
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", "/report/" + club_id + "?reason=" + res + "&type=group", true);
+            xhr.onload = (function() {
+            if(xhr.responseText.indexOf("reason") === -1)
+                MessageBox(tr("error"), tr("error_sending_report"), ["OK"], [Function.noop]);
+            else
+                MessageBox(tr("action_successfully"), tr("will_be_watched"), ["OK"], [Function.noop]);
+            });
+            xhr.send(null);
+            }),
+        Function.noop
+    ]);
+}
+
+$(document).on("click", "#_photoDelete, #_videoDelete", function(e) {
+    var formHtml = "<form id='tmpPhDelF' action='" + u(this).attr("href") + "' >";
+    formHtml    += "<input type='hidden' name='hash' value='" + u("meta[name=csrf]").attr("value") + "' />";
+    formHtml    += "</form>";
+    u("body").append(formHtml);
+    
+    MessageBox(tr('warning'), tr('question_confirm'), [
+        tr('yes'),
+        tr('no')
+    ], [
+        (function() {
+            u("#tmpPhDelF").nodes[0].submit();
+        }),
+        (function() {
+            u("#tmpPhDelF").remove();
+        }),
+    ]);
+    
+    e.stopPropagation()
+    return e.preventDefault();
+});
+/* @rem-pai why this func wasn't named as "#_deleteDialog"? It looks universal IMO */
+
+u(document).on("click", "#_noteDelete", function(e) {
+    var formHtml = "<form id='tmpPhDelF' action='" + u(this).attr("href") + "' >";
+    formHtml    += "<input type='hidden' name='hash' value='" + u("meta[name=csrf]").attr("value") + "' />";
+    formHtml    += "</form>";
+    u("body").append(formHtml);
+    
+    MessageBox(tr('warning'), tr('question_confirm'), [
+        tr('yes'),
+        tr('no')
+    ], [
+        (function() {
+            u("#tmpPhDelF").nodes[0].submit();
+        }),
+        (function() {
+            u("#tmpPhDelF").remove();
+        }),
+    ]);
+    
+    e.stopPropagation()
+    return e.preventDefault();
+});
+
+// TODO REWRITE cuz its a little broken
+u(document).on("click", "#_pinGroup", async function(e) {
+    e.preventDefault();
+    e.stopPropagation()
+
+    let link = u(this).attr("href");
+    let thisButton = u(this);
+    let groupName = u(this).attr("data-group-name");
+    let groupUrl = u(this).attr("data-group-url");
+    let list = u('#_groupListPinnedGroups');
+    
+    thisButton.nodes[0].classList.add('loading');
+    thisButton.nodes[0].classList.add('disable');
+
+    let req = await ky(link);
+    if(req.ok == false) {
+        NewNotification(tr('error'), tr('error_1'), null);
+        thisButton.nodes[0].classList.remove('loading');
+        thisButton.nodes[0].classList.remove('disable');
+        return;
+    }
+
+    if(!parseAjaxResponse(await req.text())) {
+        thisButton.nodes[0].classList.remove('loading');
+        thisButton.nodes[0].classList.remove('disable');
+        return;
+    }
+
+    // Adding a divider if not already there
+    if(list.nodes[0].children.length == 0) {
+        list.nodes[0].append(u('<div class="menu_divider"></div>').first());
+    }
+
+    // Changing the button name
+    if(thisButton.html().trim() == tr('remove_from_left_menu')) {
+        thisButton.html(tr('add_to_left_menu'));
+        for(let i = 0; i < list.nodes[0].children.length; i++) {
+            let element = list.nodes[0].children[i];
+            if(element.pathname == groupUrl) {
+                element.remove();
+            }
+        }
+    }else{
+        thisButton.html(tr('remove_from_left_menu'));
+        list.nodes[0].append(u('<a href="' + groupUrl + '" class="link group_link">' + groupName + '</a>').first());
+    }
+
+    // Adding the group to the left group list
+    if(list.nodes[0].children[0].className != "menu_divider" || list.nodes[0].children.length == 1) {
+        list.nodes[0].children[0].remove();
+    }
+    
+    thisButton.nodes[0].classList.remove('loading');
+    thisButton.nodes[0].classList.remove('disable');
+
+    return false;
+});
+
+u(document).handle("submit", "#_submitUserSubscriptionAction", async function(e) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    u(this).nodes[0].parentElement.classList.add('loading');
+    u(this).nodes[0].parentElement.classList.add('disable');
+    console.log(e.target);
+    const data = await fetch(u(this).attr('action'), { method: 'POST', body: new FormData(e.target) });
+    if (data.ok) {
+        u(this).nodes[0].parentElement.classList.remove('loading');
+        u(this).nodes[0].parentElement.classList.remove('disable');
+        if (e.target[0].value == "add") {
+            u(this).nodes[0].parentElement.innerHTML = tr("friends_add_msg");
+        } else if (e.target[0].value == "rej") {
+            u(this).nodes[0].parentElement.innerHTML = tr("friends_rej_msg");
+        } else if (e.target[0].value == "rem") {
+            u(this).nodes[0].parentElement.innerHTML = tr("friends_rem_msg");
+        }
+    }
+})
+
+function changeOwner(club, newOwner, newOwnerName) {
+    const action = "/groups/" + club + "/setNewOwner/" + newOwner;
+
+    MessageBox(tr('group_changeowner_modal_title'), `
+        ${tr("group_changeowner_modal_text", escapeHtml(newOwnerName))}
+        <br/><br/>
+        <form id="transfer-owner-permissions-form" method="post">
+            <label for="password">${tr('password')}</label>
+            <input type="password" id="password" name="password" required />
+            <input type="hidden" name="hash" value='${window.router.csrf}' />
+        </form>
+    `, [tr('transfer'), tr('cancel')], [
+        () => {
+            $("#transfer-owner-permissions-form").attr("action", action);
+            document.querySelector("#transfer-owner-permissions-form").submit();
+        }, Function.noop
+    ]);
+}
+
+async function withdraw(id) {
+    let coins = await API.Apps.withdrawFunds(id);
+    if(coins == 0)
+        MessageBox(tr('app_withdrawal'), tr('app_withdrawal_empty'), ["OK"], [Function.noop]);
+    else
+        MessageBox(tr('app_withdrawal'), tr("app_withdrawal_created", window.coins), ["OK"], [Function.noop]);
+}
+
+function toggleMaritalStatus(e) {
+    let elem = $("#maritalstatus-user");
+    $("#maritalstatus-user-select").empty();
+    if ([0, 1, 8].includes(Number(e.value))) {
+        elem.hide();
+    } else {
+        elem.show();
+    }
+}
+
+u(document).on("paste", ".vouncher_input", function(event) {
+    const vouncher = event.clipboardData.getData("text");
+
+    let segments;
+    if(vouncher.length === 27) {
+        segments = vouncher.split("-");
+        if(segments.length !== 4)
+            segments = undefined;
+    } else if(vouncher.length === 24) {
+        segments = chunkSubstr(vouncher, 6);
+    }
+
+    if(segments !== undefined) {
+        document.vouncher_form.key0.value = segments[0];
+        document.vouncher_form.key1.value = segments[1];
+        document.vouncher_form.key2.value = segments[2];
+        document.vouncher_form.key3.value = segments[3];
+        document.vouncher_form.key3.focus();
+    }
+
+    event.preventDefault();
+});
+
+// Migrated from inline end
+
 var tooltipClientTemplate = Handlebars.compile(`
     <table>
         <tr>
@@ -542,7 +821,8 @@ var tooltipClientNoInfoTemplate = Handlebars.compile(`
     </table>
 `);
 
-tippy(".client_app", {
+tippy.delegate("body", {
+    target: '.client_app',
     theme: "light vk",
     content: "⌛",
     allowHTML: true,
@@ -578,6 +858,54 @@ tippy(".client_app", {
         }
     }
 });
+
+tippy.delegate('body', {
+    animation: 'up_down',
+    target: `.post-like-button[data-type]:not([data-likes="0"])`,
+    theme: "special vk",
+    content: "⌛",
+    allowHTML: true,
+    interactive: true,
+    interactiveDebounce: 500,
+
+    onCreate: async function(that) {
+        that._likesList = null;
+    },
+
+    onShow: async function(that) {
+        const id  = that.reference.dataset.id
+        const type = that.reference.dataset.type
+        let final_type = type
+        if(type == 'post') {
+            final_type = 'wall'
+        }
+
+        if(!that._likesList) {
+            that._likesList = await window.OVKAPI.call('likes.getList', {'extended': 1, 'count': 6, 'type': type, 'owner_id': id.split('_')[0], 'item_id': id.split('_')[1]})
+        }
+
+        const final_template = u(`
+            <div style='margin: -6px -10px;'>
+                <div class='like_tooltip_wrapper'>
+                    <a href="/${final_type}/${id}/likes" class='like_tooltip_head'>
+                        <span>${tr('liked_by_x_people', that._likesList.count)}</span>
+                    </a>
+
+                    <div class='like_tooltip_body'>
+                        <div class='like_tooltip_body_grid'></div>
+                    </div>
+                </div>
+            </div>
+        `)
+
+        that._likesList.items.forEach(item => {
+            final_template.find('.like_tooltip_body .like_tooltip_body_grid').append(`
+                <a href='/id${item.id}'><img src='${item.photo_50}' alt='.'></a>
+            `)
+        })
+        that.setContent(final_template.nodes[0].outerHTML)
+    }
+})
 
 async function showArticle(note_id) {
     u("body").addClass("dimmed");
@@ -836,7 +1164,7 @@ async function __uploadToTextarea(file, textareaNode) {
     if(filetype == 'photo') {
         const temp_url = URL.createObjectURL(file)
         const rand = random_int(0, 1000)
-        textareaNode.find('.post-horizontal').append(`<a id='temp_filler${rand}' class="upload-item"><img src='${temp_url}'></a>`)
+        textareaNode.find('.post-horizontal').append(`<a id='temp_filler${rand}' class="upload-item lagged"><img src='${temp_url}'></a>`)
         
         const res = await fetch(`/photos/upload`, {
             method: 'POST',
@@ -899,14 +1227,14 @@ u(document).on('paste', '#write .small-textarea', (e) => {
     }
 })
 
-u(document).on('dragstart', '#write .post-horizontal .upload-item, .post-vertical .upload-item', (e) => {
+u(document).on('dragstart', '#write .post-horizontal .upload-item, .post-vertical .upload-item, .PE_audios .vertical-attachment', (e) => {
     //e.preventDefault()
     //console.log(e)
     u(e.target).closest('.upload-item').addClass('currently_dragging')
     return
 })
 
-u(document).on('dragover', '#write .post-horizontal .upload-item, .post-vertical .upload-item', (e) => {
+u(document).on('dragover', '#write .post-horizontal .upload-item, .post-vertical .upload-item, .PE_audios .vertical-attachment', (e) => {
     e.preventDefault()
 
     const target = u(e.target).closest('.upload-item')
@@ -923,7 +1251,12 @@ u(document).on('dragover', '#write .post-horizontal .upload-item, .post-vertical
     return
 })
 
-u(document).on('#write dragleave dragend', '.post-horizontal .upload-item, .post-vertical .upload-item', (e) => {
+u(document).on("dragover drop", async (e) => {
+    e.preventDefault()
+    return false;
+})
+
+u(document).on('dragleave dragend', '#write .post-horizontal .upload-item, .post-vertical .upload-item, .PE_audios .vertical-attachment', (e) => {
     //console.log(e)
     u(e.target).closest('.upload-item').removeClass('dragged')
     return
@@ -955,25 +1288,6 @@ u(document).on("drop", '#write', function(e) {
         current.nodes[0].outerHTML = first_html
         target.nodes[0].outerHTML = second_html
     }
-})
-
-u(document).on('submit', '#write > form', (e) => {
-    const target = u(e.target)
-    const horizontal_array = []
-    const horizontal_input = target.find(`input[name='horizontal_attachments']`)
-    const horizontal_attachments = target.find(`.post-horizontal > a`)
-    horizontal_attachments.nodes.forEach(_node => {
-        horizontal_array.push(`${_node.dataset.type}${_node.dataset.id}`)
-    })
-    horizontal_input.nodes[0].value = horizontal_array.join(',')
-
-    const vertical_array = []
-    const vertical_input = target.find(`input[name='vertical_attachments']`)
-    const vertical_attachments = target.find(`.post-vertical > .vertical-attachment`)
-    vertical_attachments.nodes.forEach(_node => {
-        vertical_array.push(`${_node.dataset.type}${_node.dataset.id}`)
-    })
-    vertical_input.nodes[0].value = vertical_array.join(',')
 })
 
 // !!! PHOTO PICKER !!!
@@ -1067,6 +1381,7 @@ u(document).on("click", "#__photoAttachment", async (e) => {
     // add photo
     u(".ovk-diag-body .attachment_selector").on("click", ".album-photo", async (ev) => {
         ev.preventDefault()
+        ev.stopPropagation()
         
         const target = u(ev.target).closest('.album-photo')
         const dataset = target.nodes[0].dataset
@@ -1585,13 +1900,14 @@ u(document).on('click', `.post-horizontal .upload-item .upload-delete`, (e) => {
     u(e.target).closest('.upload-item').remove()
 })
 
-u(document).on('click', `.post-vertical .vertical-attachment #small_remove_button`, (e) => {
+u(document).on('click', `.vertical-attachment #small_remove_button`, (e) => {
     e.preventDefault()
     u(e.target).closest('.vertical-attachment').remove()
 })
 
 u(document).on('click', '.post-buttons .upload-item', (e) => {
     e.preventDefault()
+    e.stopPropagation()
 })
 
 u(document).on('click', '.post.post-nsfw .post-content', (e) => {
@@ -1885,7 +2201,6 @@ $(document).on("click", "#add_image", (e) => {
         let video = document.querySelector("#_takeSelfieFrame video")
 
         if(!navigator.mediaDevices) {
-            // ех вот бы месседжбоксы были бы классами
             u("body").removeClass("dimmed");
             document.querySelector("html").style.overflowY = "scroll"
             u(".ovk-diag-cont").remove();
@@ -2003,6 +2318,94 @@ $(document).on("click", ".avatarDelete", (e) => {
     ]);
 })
 
+async function __processPaginatorNextPage(page)
+{
+    const container = u('.scroll_container')
+    const container_node = '.scroll_node'
+    const parser = new DOMParser
+
+    const replace_url = new URL(location.href)
+    replace_url.searchParams.set('p', page)
+    /*replace_url.searchParams.set('al', 1)
+    replace_url.searchParams.set('hash', u("meta[name=csrf]").attr("value"))*/
+
+    const new_content = await fetch(replace_url.href)
+    const new_content_response = await new_content.text()
+    const parsed_content = parser.parseFromString(new_content_response, 'text/html')
+
+    const nodes = parsed_content.querySelectorAll(container_node)
+    nodes.forEach(node => {
+        container.append(node)
+    })
+
+    u(`.paginator:not(.paginator-at-top)`).html(parsed_content.querySelector('.paginator:not(.paginator-at-top)').innerHTML)
+    if(u(`.paginator:not(.paginator-at-top)`).nodes[0].closest('.scroll_container')) {
+        container.nodes[0].append(u(`.paginator:not(.paginator-at-top)`).nodes[0].parentNode)
+    }
+    
+    if(window.player && window.player.isAtAudiosPage() && window.player.isAtCurrentContextPage()) {
+        window.player.loadContext(page)
+        window.player.__highlightActiveTrack()
+    }
+
+    /*if(window.router) {
+        window.router.savePreviousPage()
+    }*/
+
+    const new_url = new URL(location.href)
+    new_url.hash = page
+    history.replaceState(null, null, new_url)
+
+    if(typeof __scrollHook != 'undefined') {
+        __scrollHook(page)
+    }
+}
+
+const showMoreObserver = new IntersectionObserver(entries => {
+    entries.forEach(async x => {
+        if(x.isIntersecting) {
+            if(Number(localStorage.getItem('ux.auto_scroll') ?? 1) == 0) {
+                return
+            }
+
+            if(u('.scroll_container').length < 1) {
+                return
+            }
+            
+            const target = u(x.target)
+            if(target.length < 1 || target.hasClass('paginator-at-top')) {
+                return
+            }
+
+            const current_url = new URL(location.href)
+            if(current_url.searchParams && !isNaN(parseInt(current_url.searchParams.get('p')))) {
+                return
+            }
+
+            target.addClass('lagged')
+            const active_tab = target.find('.active')
+            const next_page  = u(active_tab.nodes[0] ? active_tab.nodes[0].nextElementSibling : null)
+            if(next_page.length < 1) {
+                u('.paginator:not(.paginator-at-top)').removeClass('lagged')
+                return
+            }
+
+            const page_number = Number(next_page.html())
+            await __processPaginatorNextPage(page_number)
+            bsdnHydrate()
+            u('.paginator:not(.paginator-at-top)').removeClass('lagged')
+        }
+    })
+}, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0,
+})
+
+if(u('.paginator:not(.paginator-at-top)').length > 0) {
+    showMoreObserver.observe(u('.paginator:not(.paginator-at-top)').nodes[0])
+}
+
 u(document).on('click', '#__sourceAttacher', (e) => {
     MessageBox(tr('add_source'), `
         <div id='source_flex_kunteynir'>
@@ -2092,3 +2495,76 @@ u(document).on('keyup', async (e) => {
         }
     }
 })
+
+u(document).on('mouseover mousemove mouseout', `div[data-tip='simple']`, (e) => {
+    if(e.target.dataset.allow_mousemove != '1' && e.type == 'mousemove') {
+        return
+    }
+
+    if(e.type == 'mouseout') {
+        u(`.tip_result`).remove()
+        return
+    }
+
+    const target = u(e.target).closest(`div[data-tip='simple']`)
+    const title  = target.attr('data-title')
+    if(title == '') {
+        return
+    }
+
+    target.nodes[0].parentNode.insertAdjacentHTML('afterbegin', `
+        <div class='tip_result' style='left:${e.layerX}px;'>
+            ${escapeHtml(title)}
+        </div>    
+    `)
+})
+
+function setStatusEditorShown(shown) {
+    document.getElementById("status_editor").style.display = shown ? "block" : "none";
+}
+
+u(document).on('click', (event) => {
+    u('#ctx_menu').remove()
+    if(u('#status_editor').length < 1) {
+        return
+    }
+
+    if(!event.target.closest("#status_editor") && !event.target.closest("#page_status_text"))
+        setStatusEditorShown(false);
+})
+
+u(document).on('click', '#page_status_text', (e) => {
+    setStatusEditorShown(true)
+})
+
+async function changeStatus() {
+    const status = document.status_popup_form.status.value;
+    const broadcast = document.status_popup_form.broadcast.checked;
+
+    document.status_popup_form.submit.innerHTML = "<div class=\"button-loading\"></div>";
+    document.status_popup_form.submit.disabled = true;
+
+    const formData = new FormData();
+    formData.append("status", status);
+    formData.append("broadcast", Number(broadcast));
+    formData.append("hash", document.status_popup_form.hash.value);
+    const response = await ky.post("/edit?act=status", {body: formData});
+
+    if(!parseAjaxResponse(await response.text())) {
+        document.status_popup_form.submit.innerHTML = tr("send");
+        document.status_popup_form.submit.disabled = false;
+        return;
+    }
+
+    if(document.status_popup_form.status.value === "") {
+        document.querySelector("#page_status_text").innerHTML = `[ ${tr("change_status")} ]`;
+        document.querySelector("#page_status_text").className = "edit_link page_status_edit_button";
+    } else {
+        document.querySelector("#page_status_text").innerHTML = status;
+        document.querySelector("#page_status_text").className = "page_status page_status_edit_button";
+    }
+
+    setStatusEditorShown(false);
+    document.status_popup_form.submit.innerHTML = tr("send");
+    document.status_popup_form.submit.disabled = false;
+}
