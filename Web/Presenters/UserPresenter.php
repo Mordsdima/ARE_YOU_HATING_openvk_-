@@ -7,7 +7,7 @@ use openvk\Web\Models\Entities\{Photo, Post, EmailChangeVerification};
 use openvk\Web\Models\Entities\Notifications\{CoinsTransferNotification, RatingUpNotification};
 use openvk\Web\Models\Repositories\{Users, Clubs, Albums, Videos, Notes, Vouchers, EmailChangeVerifications, Audios, Posts};
 use openvk\Web\Models\Exceptions\InvalidUserNameException;
-use openvk\Web\Util\Validator;
+use openvk\Web\Util\{Validator, ActivityPubChecker};
 use Chandler\Security\Authenticator;
 use lfkeitel\phptotp\{Base32, Totp};
 use chillerlan\QRCode\{QRCode, QROptions};
@@ -28,7 +28,16 @@ final class UserPresenter extends OpenVKPresenter
     
     function renderInbox(int $id): void 
     {
-        exit("To-Do!");
+        if($_SERVER['REQUEST_METHOD'] != "POST") {
+            header("HTTP/1.1 422 Unprocessable Entity");
+            exit("422.");
+        }
+        if(!(new ActivityPubChecker)->activityPubCheckRequest("")) { 
+            header("HTTP/1.1 401 Unauthorized");
+            exit("Signature is not valid.");
+        }
+
+        header("HTTP/1.1 204 No Content");
     }
 
     function renderOutbox(int $id): void // Isnt that should go to WallPresenter? :thinking_face:

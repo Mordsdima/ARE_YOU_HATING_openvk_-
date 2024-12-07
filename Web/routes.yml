@@ -97,6 +97,8 @@ routes:
       handler: "User->view"
     - url: "/id{num}/outbox"
       handler: "User->outbox"
+    - url: "/id{num}/inbox"
+      handler: "User->inbox"
     - url: "/friends{num}"
       handler: "User->friends"
     - url: "/edit"
